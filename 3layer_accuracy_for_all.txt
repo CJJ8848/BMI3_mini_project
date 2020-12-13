@@ -1,0 +1,258 @@
+
+
+learning rate:0.0001
+batch_size:8
+epoch: 1
+batch size: 8
+validation set accuracy: 0.37875
+
+epoch: 2
+batch size: 8
+validation set accuracy: 0.5475
+
+epoch: 3
+batch size: 8
+validation set accuracy: 0.51875
+
+epoch: 4
+batch size: 8
+validation set accuracy: 0.62125
+
+epoch: 5
+batch size: 8
+validation set accuracy: 0.625
+
+epoch: 6
+batch size: 8
+validation set accuracy: 0.69125
+
+epoch: 7
+batch size: 8
+validation set accuracy: 0.73375
+
+epoch: 8
+batch size: 8
+validation set accuracy: 0.69375
+
+epoch: 9
+batch size: 8
+validation set accuracy: 0.6975
+
+epoch: 10
+batch size: 8
+validation set accuracy: 0.73625
+
+
+learning rate:0.0001
+batch_size:16
+epoch: 1
+batch size: 16
+validation set accuracy: 0.2525
+
+epoch: 2
+batch size: 16
+validation set accuracy: 0.4675
+
+epoch: 3
+batch size: 16
+validation set accuracy: 0.56375
+
+epoch: 4
+batch size: 16
+validation set accuracy: 0.55625
+
+epoch: 5
+batch size: 16
+validation set accuracy: 0.615
+
+epoch: 6
+batch size: 16
+validation set accuracy: 0.625
+
+epoch: 7
+batch size: 16
+validation set accuracy: 0.6175
+
+epoch: 8
+batch size: 16
+validation set accuracy: 0.6925
+
+epoch: 9
+batch size: 16
+validation set accuracy: 0.64375
+
+epoch: 10
+batch size: 16
+validation set accuracy: 0.705
+
+batch_size:32
+
+learning rate:0.0001
+batch_size:32
+epoch: 1
+batch size: 32
+validation set accuracy: 0.16375
+
+epoch: 2
+batch size: 32
+validation set accuracy: 0.3225
+
+epoch: 3
+batch size: 32
+validation set accuracy: 0.44875
+
+epoch: 4
+batch size: 32
+validation set accuracy: 0.595
+
+epoch: 5
+batch size: 32
+validation set accuracy: 0.5275
+
+epoch: 6
+batch size: 32
+validation set accuracy: 0.60875
+
+epoch: 7
+batch size: 32
+validation set accuracy: 0.6275
+
+epoch: 8
+batch size: 32
+validation set accuracy: 0.635
+
+epoch: 9
+batch size: 32
+validation set accuracy: 0.595
+
+epoch: 10
+batch size: 32
+validation set accuracy: 0.63375
+
+learning rate:1e-05
+batch_size:8
+epoch: 1
+batch size: 8
+validation set accuracy: 0.22
+
+epoch: 2
+batch size: 8
+validation set accuracy: 0.30375
+
+epoch: 3
+batch size: 8
+validation set accuracy: 0.28375
+
+epoch: 4
+batch size: 8
+validation set accuracy: 0.3475
+
+epoch: 5
+batch size: 8
+validation set accuracy: 0.3175
+
+epoch: 6
+batch size: 8
+validation set accuracy: 0.3525
+
+epoch: 7
+batch size: 8
+validation set accuracy: 0.31375
+
+epoch: 8
+batch size: 8
+validation set accuracy: 0.43875
+
+epoch: 9
+batch size: 8
+validation set accuracy: 0.47
+
+epoch: 10
+batch size: 8
+validation set accuracy: 0.49
+
+
+learning rate:1e-05
+batch_size:16
+epoch: 1
+batch size: 16
+validation set accuracy: 0.13125
+
+epoch: 2
+batch size: 16
+validation set accuracy: 0.205
+
+epoch: 3
+batch size: 16
+validation set accuracy: 0.30875
+
+epoch: 4
+batch size: 16
+validation set accuracy: 0.335
+
+epoch: 5
+batch size: 16
+validation set accuracy: 0.33
+
+epoch: 6
+batch size: 16
+validation set accuracy: 0.3225
+
+epoch: 7
+batch size: 16
+validation set accuracy: 0.30875
+
+epoch: 8
+batch size: 16
+validation set accuracy: 0.34
+
+epoch: 9
+batch size: 16
+validation set accuracy: 0.37625
+
+epoch: 10
+batch size: 16
+validation set accuracy: 0.34125
+
+batch_size:32
+learning rate:1e-05
+batch_size:32
+epoch: 1
+batch size: 32
+validation set accuracy: 0.14875
+
+epoch: 2
+batch size: 32
+validation set accuracy: 0.195
+
+epoch: 3
+batch size: 32
+validation set accuracy: 0.3125
+
+epoch: 4
+batch size: 32
+validation set accuracy: 0.34
+
+epoch: 5
+batch size: 32
+validation set accuracy: 0.35
+
+epoch: 6
+batch size: 32
+validation set accuracy: 0.3975
+
+epoch: 7
+batch size: 32
+validation set accuracy: 0.39
+
+epoch: 8
+batch size: 32
+validation set accuracy: 0.36875
+
+epoch: 9
+batch size: 32
+validation set accuracy: 0.39625
+
+epoch: 10
+batch size: 32
+validation set accuracy: 0.36625

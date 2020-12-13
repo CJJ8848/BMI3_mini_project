@@ -1,0 +1,257 @@
+
+learning rate:0.0001
+batch_size:8
+epoch: 1
+batch size: 8
+validation set accuracy: 0.4084158415841584
+
+epoch: 2
+batch size: 8
+validation set accuracy: 0.4670398009950249
+
+epoch: 3
+batch size: 8
+validation set accuracy: 0.5095514950166113
+
+epoch: 4
+batch size: 8
+validation set accuracy: 0.529925187032419
+
+epoch: 5
+batch size: 8
+validation set accuracy: 0.5508982035928144
+
+epoch: 6
+batch size: 8
+validation set accuracy: 0.56738768718802
+
+epoch: 7
+batch size: 8
+validation set accuracy: 0.5854136947218259
+
+epoch: 8
+batch size: 8
+validation set accuracy: 0.601123595505618
+
+epoch: 9
+batch size: 8
+validation set accuracy: 0.6090455049944506
+
+epoch: 10
+batch size: 8
+validation set accuracy: 0.619005994005994
+
+
+
+learning rate:0.0001
+batch_size:16
+epoch: 1
+batch size: 16
+validation set accuracy: 0.32598039215686275
+
+epoch: 2
+batch size: 16
+validation set accuracy: 0.42945544554455445
+
+epoch: 3
+batch size: 16
+validation set accuracy: 0.4615066225165563
+
+epoch: 4
+batch size: 16
+validation set accuracy: 0.48445273631840796
+
+epoch: 5
+batch size: 16
+validation set accuracy: 0.499003984063745
+
+epoch: 6
+batch size: 16
+validation set accuracy: 0.5220099667774086
+
+epoch: 7
+batch size: 16
+validation set accuracy: 0.5352564102564102
+
+epoch: 8
+batch size: 16
+validation set accuracy: 0.5490960099750624
+
+epoch: 9
+batch size: 16
+validation set accuracy: 0.5631929046563193
+
+epoch: 10
+batch size: 16
+validation set accuracy: 0.5681137724550899
+
+batch_size:32
+learning rate:0.0001
+batch_size:32
+epoch: 1
+batch size: 32
+validation set accuracy: 0.22596153846153846
+
+epoch: 2
+batch size: 32
+validation set accuracy: 0.31004901960784315
+
+epoch: 3
+batch size: 32
+validation set accuracy: 0.3745888157894737
+
+epoch: 4
+batch size: 32
+validation set accuracy: 0.41800742574257427
+
+epoch: 5
+batch size: 32
+validation set accuracy: 0.439484126984127
+
+epoch: 6
+batch size: 32
+validation set accuracy: 0.4639900662251656
+
+epoch: 7
+batch size: 32
+validation set accuracy: 0.4889914772727273
+
+epoch: 8
+batch size: 32
+validation set accuracy: 0.5087064676616916
+
+epoch: 9
+batch size: 32
+validation set accuracy: 0.5172842920353983
+
+epoch: 10
+batch size: 32
+validation set accuracy: 0.5250249003984063
+
+
+learning rate:1e-05
+batch_size:8
+epoch: 1
+batch size: 8
+validation set accuracy: 0.23391089108910892
+
+epoch: 2
+batch size: 8
+validation set accuracy: 0.28544776119402987
+
+epoch: 3
+batch size: 8
+validation set accuracy: 0.3073089700996678
+
+epoch: 4
+batch size: 8
+validation set accuracy: 0.3491271820448878
+
+epoch: 5
+batch size: 8
+validation set accuracy: 0.36826347305389223
+
+epoch: 6
+batch size: 8
+validation set accuracy: 0.38207154742096505
+
+epoch: 7
+batch size: 8
+validation set accuracy: 0.39194008559201143
+
+epoch: 8
+batch size: 8
+validation set accuracy: 0.4004369538077403
+
+epoch: 9
+batch size: 8
+validation set accuracy: 0.41148723640399554
+
+epoch: 10
+batch size: 8
+validation set accuracy: 0.41833166833166835
+
+learning rate:1e-05
+batch_size:16
+epoch: 1
+batch size: 16
+validation set accuracy: 0.21200980392156862
+
+epoch: 2
+batch size: 16
+validation set accuracy: 0.27103960396039606
+
+epoch: 3
+batch size: 16
+validation set accuracy: 0.2897350993377483
+
+epoch: 4
+batch size: 16
+validation set accuracy: 0.3069029850746269
+
+epoch: 5
+batch size: 16
+validation set accuracy: 0.33167330677290835
+
+epoch: 6
+batch size: 16
+validation set accuracy: 0.3442691029900332
+
+epoch: 7
+batch size: 16
+validation set accuracy: 0.36004273504273504
+
+epoch: 8
+batch size: 16
+validation set accuracy: 0.3682980049875312
+
+epoch: 9
+batch size: 16
+validation set accuracy: 0.3840077605321508
+
+epoch: 10
+batch size: 16
+validation set accuracy: 0.39184131736526945
+
+learning rate:1e-05
+batch_size:32
+epoch: 1
+batch size: 32
+validation set accuracy: 0.140625
+
+epoch: 2
+batch size: 32
+validation set accuracy: 0.19791666666666666
+
+epoch: 3
+batch size: 32
+validation set accuracy: 0.25287828947368424
+
+epoch: 4
+batch size: 32
+validation set accuracy: 0.2905321782178218
+
+epoch: 5
+batch size: 32
+validation set accuracy: 0.3169642857142857
+
+epoch: 6
+batch size: 32
+validation set accuracy: 0.3305049668874172
+
+epoch: 7
+batch size: 32
+validation set accuracy: 0.3439275568181818
+
+epoch: 8
+batch size: 32
+validation set accuracy: 0.35712064676616917
+
+epoch: 9
+batch size: 32
+validation set accuracy: 0.3649059734513274
+
+epoch: 10
+batch size: 32
+validation set accuracy: 0.3703934262948207
+
