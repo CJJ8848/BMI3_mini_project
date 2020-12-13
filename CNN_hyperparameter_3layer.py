@@ -50,7 +50,7 @@ def read_and_decode(filename):
 
     img = tf.decode_raw(features['img_raw'], tf.uint8)# Throws the Img tensor in the flow
     img = tf.reshape(img, [224, 224, 3])  # Reshape the data to a three channels 224 * 224 images
-    img = tf.cast(img, tf.float32) * (1. / 255) - 0.5  # 图像减去均值处理
+    img = tf.cast(img, tf.float32) * (1. / 255) - 0.5  # normalization by subtracting the RGB means
     # img = tf.cast(img, tf.float32) * (1. / 255)
     # mean_red = np.sum(img[:, :, 0]) / (224 * 224)
     # mean_green = np.sum(img[:, :, 1]) / (224 * 224)

@@ -1,0 +1,2 @@
+model_checkpoint_path: "/Users/cuijiajun/Desktop/BMI3/BMI_mini_project/ckpt/model_acc_0.72375.ckpt"
+all_model_checkpoint_paths: "/Users/cuijiajun/Desktop/BMI3/BMI_mini_project/ckpt/model_acc_0.72375.ckpt"

@@ -54,7 +54,7 @@ def read_and_decode(filename):
 
     img = tf.decode_raw(features['img_raw'], tf.uint8)# Throws the Img tensor in the flow
     img = tf.reshape(img, [224, 224, 3])  # Reshape the data to a three channels 224 * 224 images
-    img = tf.cast(img, tf.float32) * (1. / 255) - 0.5  # 图像减去均值处理
+    img = tf.cast(img, tf.float32) * (1. / 255) - 0.5   # normalization by subtracting the RGB means
     label = tf.cast(features['label'], tf.int32)  # Throws the Label tensor to the flow
 
     return img, label
@@ -224,84 +224,94 @@ if __name__ == '__main__':
             file_handle.write(
                 "epoch: " + str(epoch) + "\n" + "batch size: " + str(batch_size) + "\n" + "test set accuracy (mean): " + str(accmean) + "\n"+"\n"
             )
-        #plot the ROC curve
-        for file in os.listdir(dirname(__file__) + '/ROC_curve/'):
-            os.remove(dirname(__file__) + '/ROC_curve/' + file)
 
-        fpr = dict()
-        tpr = dict()
-        roc_auc = dict()
-
-        classes = ['TUM', 'STR', 'NORM', 'ADI', 'DEB', 'LYM', 'MUS', 'MUC']
-
-        for i in range(len(classes)):
-            fpr[i], tpr[i], thresholds = metrics.roc_curve(labellist[:, i], plist[:, i])
-            roc_auc[i] = metrics.auc(fpr[i], tpr[i])
-
-        # Compute micro-average ROC curve and ROC area（方法二）
-        fpr["micro"], tpr["micro"], _ = metrics.roc_curve(labellist.ravel(), plist.ravel())
-        roc_auc["micro"] = metrics.auc(fpr["micro"], tpr["micro"])
-
-        # Compute macro-average ROC curve and ROC area（方法一）
-        # First aggregate all false positive rates
-        all_fpr = np.unique(np.concatenate([fpr[i] for i in range(len(classes))]))
-        # Then interpolate all ROC curves at this points
-        mean_tpr = np.zeros_like(all_fpr)
-        for i in range(len(classes)):
-            mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
-        # Finally average it and compute AUC
-        mean_tpr /= len(classes)
-        fpr["macro"] = all_fpr
-        tpr["macro"] = mean_tpr
-        roc_auc["macro"] = metrics.auc(fpr["macro"], tpr["macro"])
-
-        plt.figure()
-        lw = 2
-
-        colors = ['royalblue', 'limegreen', 'r', 'darkgray', 'm', 'y', 'k', 'darkorange']
-        for i, color in zip(range(len(classes)), colors):
-            plt.plot(fpr[i], tpr[i], color=color, lw=lw,
-                     label='ROC curve of class {0} (AUC = {1:0.3f})'
-                           ''.format(classes[i], roc_auc[i]))
-        plt.plot([0, 1], [0, 1], 'k--', lw=lw)
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.legend(loc="lower right")
-        plt.savefig(dirname(__file__) + "/ROC_curve/allclass.png")
-        plt.figure()
-        lw = 2
-        plt.plot(fpr["micro"], tpr["micro"],
-                 label='micro-average ROC curve (area = {0:0.3f})'
-                       ''.format(roc_auc["micro"]),
-                 color='deeppink', linewidth=3)
-
-        plt.plot(fpr["macro"], tpr["macro"],
-                 label='macro-average ROC curve (area = {0:0.2f})'
-                       ''.format(roc_auc["macro"]),
-                 color='royalblue', linewidth=3)
-
-        for i in range(len(classes)):
-            plt.plot(fpr[i], tpr[i], color='darkorange', linestyle=':', lw=lw,
-                     label='ROC curve of class {0} (AUC = {1:0.3f})'
-                           ''.format(classes[i], roc_auc[i]))
-        plt.legend(["micro-average ROC curve (AUC = {0:0.3f})" ''.format(roc_auc['micro']),
-                    "macro-average ROC curve (AUC = {0:0.3f})" ''.format(roc_auc['macro']), "ROC curve of each group"])
-
-        plt.plot([0, 1], [0, 1], 'k--', lw=lw)
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.savefig(dirname(__file__)+"/ROC_curve/with_average.png")
-        plt.show()
-        # #去除省略号 output the whole np array
-        # np.set_printoptions(threshold=sys.maxsize)
-        # with open("3layers_accuracy_for_ROC.txt", 'a') as file_handle:
-        #     file_handle.write('\n')
-        #     file_handle.write(
-        #         "epoch: " + str(epoch) + "\n" + "batch size: " + str(batch_size) + "\n" + "test set accuracy: " + str(accmean) + "\n"+"\n"
-        #     +"labels: " + str(labellist) + "\n" + "predicted probability: " + str(plist))
         for file in os.listdir(dirname(__file__) + '/ckpt/'):
             os.remove(dirname(__file__) + '/ckpt/' + file)
         ckptpath = dirname(__file__) + '/ckpt/model'  + "_acc_" + str(accmean) + ".ckpt"
         restore_saver.save(sess, ckptpath)
+        #plot the ROC curve
+        for file in os.listdir(dirname(__file__) + '/ROC_curve/'):
+            os.remove(dirname(__file__) + '/ROC_curve/' + file)
+
+        # initialize dictionaries to store the false-positive rate (FPR), true-positive rate (TPR)
+        # and area under curve (AUC) of each class
+        FPR = dict()
+        TPR = dict()
+        AUC = dict()
+
+        classes = ['TUM', 'STR', 'NORM', 'ADI', 'DEB', 'LYM', 'MUS', 'MUC']  # names of categories
+
+        # Preparation for the ROC curve of each class
+
+        for i in range(len(classes)):
+            # Using function roc_curve in the module sklearn.metrics to calculate the FPRs and TPRs
+            FPR[i], TPR[i], thresholds = metrics.roc_curve(labellist[:, i], plist[:, i])
+            # Using the FPRs and TPRs to calculate the AUC of each class
+            AUC[i] = metrics.auc(FPR[i], TPR[i])
+
+        # Calculation of micro-average ROC curve and AUC
+        # the one_hot labels and the corresponding scores are converted to linear arrays
+        # Estimate the FPR, TPR and AUC of the overall data as a binary case regardless of classes
+        FPR["micro"], TPR["micro"], _ = metrics.roc_curve(labellist.ravel(), plist.ravel())
+        AUC["micro"] = metrics.auc(FPR["micro"], TPR["micro"])
+
+        # Calculation of macro-average ROC curve and ROC area
+        # aggregate all FPR
+        all_fpr = np.unique(np.concatenate([FPR[i] for i in range(len(classes))]))
+        # interpolate all ROC curves at this points, return interpolated TPR
+        mean_tpr = np.zeros_like(all_fpr)
+        for i in range(len(classes)):
+            mean_tpr += np.interp(all_fpr, FPR[i], TPR[i])
+        # average to get the mean TPR and compute AUC
+        mean_tpr /= len(classes)
+        FPR["macro"] = all_fpr
+        TPR["macro"] = mean_tpr
+        AUC["macro"] = metrics.auc(FPR["macro"], TPR["macro"])
+
+        # ROC drawing
+        plt.figure()
+        lw = 2
+
+        colors = ['royalblue', 'limegreen', 'r', 'darkgray', 'm', 'y', 'k', 'darkorange']
+
+        # get TPR and FPR from all classes to draw ROC curves
+        for i, color in zip(range(len(classes)), colors):
+            plt.plot(FPR[i], TPR[i], color=color, lw=lw,
+                     label='ROC curve of class {0} (AUC = {1:0.3f})'
+                           ''.format(classes[i], AUC[i]))
+        plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.legend(loc="lower right")
+        #save
+        plt.savefig(dirname(__file__) + "/ROC_curve/allclass_acc_"+str(accmean)+".png")
+        # draw the ROC that focusing on two average curves
+        plt.figure()
+        lw = 2
+        plt.plot(FPR["micro"], TPR["micro"],
+                 label='micro-average ROC curve (area = {0:0.3f})'
+                       ''.format(AUC["micro"]),
+                 color='deeppink', linewidth=3)
+
+        plt.plot(FPR["macro"], TPR["macro"],
+                 label='macro-average ROC curve (area = {0:0.2f})'
+                       ''.format(AUC["macro"]),
+                 color='royalblue', linewidth=3)
+
+        for i in range(len(classes)):
+            plt.plot(FPR[i], TPR[i], color='darkorange', linestyle=':', lw=lw,
+                     label='ROC curve of class {0} (AUC = {1:0.3f})'
+                           ''.format(classes[i], AUC[i]))
+        plt.legend(["micro-average ROC curve (AUC = {0:0.3f})" ''.format(AUC['micro']),
+                    "macro-average ROC curve (AUC = {0:0.3f})" ''.format(AUC['macro']), "ROC curve of each group"])
+
+        plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        #save
+        plt.savefig(dirname(__file__)+"/ROC_curve/with_average_acc_"+str(accmean)+".png")
+        plt.show()
+        #save the model
+
         coord.request_stop()
         coord.join(threads)
