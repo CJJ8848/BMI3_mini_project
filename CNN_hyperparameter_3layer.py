@@ -94,24 +94,128 @@ def conv2d(x,W):
 #x = feature map [batch, height, width, channels]
 def max_pool_4x4(x):
     return tf.nn.max_pool(x, ksize=[1,4,4,1], strides=[1,4,4,1], padding='SAME')# ksize = window size
+def CNN_3layers():
+    # first convolution and max_pool layer
+    W_conv1 = weight_variable([5, 5, 3, 32])  # 5x5 size window, 3 channels data (RGB), 32 layers
+    b_conv1 = bias_variable([32])  # 32 layers of window (32 features have 32 bias)
+    h_conv1 = tf.nn.relu(conv2d(x, W_conv1) + b_conv1)  # relu as an activity function
+    h_pool1 = max_pool_4x4(h_conv1)  # 4x4 max pooling layer to reduce the parameters
 
+    # second convolution and max_pool layer
+    W_conv2 = weight_variable(
+        [5, 5, 32, 64])  # 5x5 size window, 32 in channel data (output of 32 convolution keras), 64 layers
+    b_conv2 = bias_variable([64])  # 64 layers of window (64 features have 64 bias)
+    h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
+    h_pool2 = max_pool_4x4(h_conv2)
+
+    # third convolution and max_pool layer
+    W_conv3 = weight_variable(
+        [5, 5, 64, 128])  # 5x5 size window, 64 in channel data (output of 128 convolution keras), 64 layers
+    b_conv3 = bias_variable([128])  # 64 layers of window (64 features have 64 bias)
+    h_conv3 = tf.nn.relu(conv2d(h_pool2, W_conv3) + b_conv3)
+    h_pool3 = max_pool_4x4(h_conv3)
+
+    # fully connected layer
+    reshape = tf.reshape(h_pool3, [batch_size, -1])
+    dim = reshape.get_shape()[1].value
+    W_fc1 = weight_variable([dim, 1024])  # 1024 neurons in the fully connected layer
+    b_fc1 = bias_variable([1024])
+    h_fc1 = tf.nn.relu(tf.matmul(reshape, W_fc1) + b_fc1)  # activate
+
+    # dropout
+    keep_prob = tf.placeholder(tf.float32)
+    h_fc1_drop = tf.nn.dropout(h_fc1,
+                               keep_prob)  # keep_prob means the memory keeping probability (used to control the overfit)
+    # softmax predict the probability of belonging to each class
+    W_fc2 = weight_variable([1024, 8])  # 8 means 8 classes
+    b_fc2 = bias_variable([8])  # 8 means 8 classes
+    y_conv = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
+
+    # softmax loss (cross entropy)
+    # the bigger predict error is, the bigger softmax loss is
+    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y_conv), reduction_indices=[1]))
+    # adam (optimize algorithm)
+
+    train_step = tf.train.AdamOptimizer(learning_rate).minimize(
+        cross_entropy)  # learning rate = 0.001, minimize: Minimize the cross entropy loss by updating the VAR_list add operation
+    # accuracy output (for each image, judge whether tf.argmax(y_conv,1) is equal to tf.argmax(y_,1) )
+    correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_,
+                                                                  1))  # tf.argmax: axis =1, return the index array of the largest element in each row
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    return y_conv,accuracy,train_step,keep_prob
+def runtensorflow(init, batch_size,txtpath,img_batch,label_batch,img_validate, label_validate,train_step,accuracy,y_conv,keep_prob):
+    # initialize a session to run the tensor
+    with tf.Session() as sess:
+        sess.run(init)
+        # Coordinator is used to control the threads
+        coord = tf.train.Coordinator()
+        # tensorflow supports mult-thread process
+        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+        # the id of batch
+        batch_idxs = int(3200 / batch_size)
+
+        for i in range(epoch):
+            acclist = []
+            for j in range(batch_idxs):
+                # val is img vector, l is label vector
+                val, l = sess.run([img_batch, label_batch])
+                # one hot label for 8 classes
+                l = one_hot(l, 8)
+                # run the training algorithm and output the accuracy, set the memory keeping probability 0.5 to decline the over-fit
+                _, acc = sess.run([train_step, accuracy], feed_dict={x: val, y_: l, keep_prob: 0.5})
+                # print the accuracy for each batch of images of each epoch
+                print("Epoch:[%4d] [%4d/%4d], accuracy:[%.8f]" % (i + 1, j, batch_idxs, acc))
+            valtrain, lt = sess.run([img_batch, label_batch])
+            # one hot label for 8 classes
+            lt = one_hot(lt, 8)
+            # run the training algorithm and output the accuracy, set the memory keeping probability 0.5 to decline the over-fit
+            _, acctrain = sess.run([train_step, accuracy], feed_dict={x: valtrain, y_: lt, keep_prob: 0.5})
+            # validation
+            val, l = sess.run([img_validate, label_validate])
+            l = one_hot(l, 8)  # one hot label for testset labels
+            print(l)
+            labellist = l
+            y, acc = sess.run([y_conv, accuracy], feed_dict={x: val, y_: l, keep_prob: 1})
+            print(y)
+            plist = y
+            acclist.append(acc)
+            for t in range(1, 800 // batch_size):
+                # val is test img vector, l is test label vector of the last one batch of images
+                val, l = sess.run([img_validate, label_validate])
+                l = one_hot(l, 8)  # one hot label for testset labels
+                print(l)
+                labellist = np.vstack((labellist, l))
+                # get the accuracy of the test set
+                y, acc = sess.run([y_conv, accuracy], feed_dict={x: val, y_: l, keep_prob: 1})
+                print(y)
+                plist = np.vstack((plist, y))
+                acclist.append(acc)
+            accmean = np.mean(acclist)
+
+            with open(txtpath, 'a') as file_handle:
+                file_handle.write('\n')
+                file_handle.write("epoch: " + str(i + 1) + "\n" + "batch size: " + str(
+                    batch_size) + "\n" + "validation set accuracy: " + str(accmean) + "\n")
+
+        coord.request_stop()
+        coord.join(threads)
+        return accmean
 if __name__ == '__main__':
-    ## only first time to initialize the tfrecord data
+    ## only used at the first time to initialize the tfrecord data from raw data
     # in OS system, .DS_Store files need to be deleted first with the command below.
     # sudo find /Users/cuijiajun/Desktop/BMI3/mini_project/data  -name ".DS_Store" -depth -exec rm {} \;
-    # cwd1 = './data/test/'
-    # cwd2= './data/train/'
-    # cwd3= './data/validate/'
-    # outfile1 = "./tfrecords/8class_test.tfrecords"
-    # outfile2 = "./tfrecords/8class_train.tfrecords"
-    # outfile3 = "./tfrecords/8class_validate.tfrecords"
+    # cwd1 = dirname(__file__) +'/data/test/'
+    # cwd2= dirname(__file__) +'/data/train/'
+    # cwd3= dirname(__file__) +'/data/validate/'
+    # outfile1 = dirname(__file__) +"/tfrecords/8class_test.tfrecords"
+    # outfile2 = dirname(__file__) +"/tfrecords/8class_train.tfrecords"
+    # outfile3 = dirname(__file__) +"/tfrecords/8class_validate.tfrecords"
     # settfrecords(cwd1,outfile1)
     # settfrecords(cwd2,outfile2)
     # settfrecords(cwd3,outfile3)
     # start to implement
     # get img and label of train set and test set
     img, label = read_and_decode(dirname(__file__) + "/tfrecords/8class_train.tfrecords")
-    img_test, label_test = read_and_decode(dirname(__file__) + "/tfrecords/8class_test.tfrecords")
     img_validate, label_validate = read_and_decode(dirname(__file__) + "/tfrecords/8class_validate.tfrecords")
 
     # batch_choice = [8, 16, 32]
@@ -138,64 +242,10 @@ if __name__ == '__main__':
             # a placeholder in the model when the neural network is building graph
             x = tf.placeholder(tf.float32, [batch_size,224,224,3])
             y_ = tf.placeholder(tf.float32, [batch_size,8])# 8 classes
-
-            #first convolution and max_pool layer
-            W_conv1 = weight_variable([5,5,3,32])# 5x5 size window, 3 channels data (RGB), 32 layers
-            b_conv1 = bias_variable([32])# 32 layers of window (32 features have 32 bias)
-            h_conv1 = tf.nn.relu(conv2d(x, W_conv1) + b_conv1)# relu as an activity function
-            h_pool1 = max_pool_4x4(h_conv1)# 4x4 max pooling layer to reduce the parameters
-
-            #second convolution and max_pool layer
-            W_conv2 = weight_variable([5,5,32,64]) # 5x5 size window, 32 in channel data (output of 32 convolution keras), 64 layers
-            b_conv2 = bias_variable([64])# 64 layers of window (64 features have 64 bias)
-            h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
-            h_pool2 = max_pool_4x4(h_conv2)
-
-            # third convolution and max_pool layer
-            W_conv3 = weight_variable(
-                [5, 5, 64, 128])  # 5x5 size window, 64 in channel data (output of 128 convolution keras), 64 layers
-            b_conv3 = bias_variable([128])  # 64 layers of window (64 features have 64 bias)
-            h_conv3 = tf.nn.relu(conv2d(h_pool2, W_conv3) + b_conv3)
-            h_pool3 = max_pool_4x4(h_conv3)
-
-            #fully connected layer
-            reshape = tf.reshape(h_pool3,[batch_size, -1])
-            dim = reshape.get_shape()[1].value
-            W_fc1 = weight_variable([dim, 1024])# 1024 neurons in the fully connected layer
-            b_fc1 = bias_variable([1024])
-            h_fc1 = tf.nn.relu(tf.matmul(reshape, W_fc1) + b_fc1)#activate
-
-            #dropout
-            keep_prob = tf.placeholder(tf.float32)
-            h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)# keep_prob means the memory keeping probability (used to control the overfit)
-            #softmax predict the probability of belonging to each class
-            W_fc2 = weight_variable([1024,8])# 8 means 8 classes
-            b_fc2 = bias_variable([8])# 8 means 8 classes
-            y_conv = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
-
-            # softmax loss (cross entropy)
-            # the bigger predict error is, the bigger softmax loss is
-            cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y_conv), reduction_indices=[1]))
-            # adam (optimize algorithm)
-
-            train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)# learning rate = 0.001, minimize: Minimize the cross entropy loss by updating the VAR_list add operation
-            #accuracy output (for each image, judge whether tf.argmax(y_conv,1) is equal to tf.argmax(y_,1) )
-            correct_prediction = tf.equal(tf.argmax(y_conv,1),tf.argmax(y_,1)) # tf.argmax: axis =1, return the index array of the largest element in each row
-            accuracy = tf.reduce_mean(tf.cast(correct_prediction,tf.float32))
-
-
-            # # use batch to make the input batch
-            # img_batch, label_batch = tf.train.batch([img, label],
-            #                                         batch_size=batch_size, capacity=2000)
-            # img_test, label_test = tf.train.batch([img_test, label_test],
-            #                                       batch_size=batch_size, capacity=2000)
-            # img_validate, label_validate = tf.train.batch([img_validate, label_validate],
-            #                                               batch_size=batch_size, capacity=2000)
+            # construct the CNN architecture and receive the y_conv,accuracy, train_step and keep_prob
+            y_conv, accuracy, train_step, keep_prob = CNN_3layers()
             #use shuffle_batch to random the input
             img_batch, label_batch = tf.train.shuffle_batch([img, label],
-                                                            batch_size=batch_size, capacity=2000,
-                                                            min_after_dequeue=1000)
-            img_test, label_test = tf.train.shuffle_batch([img_test, label_test],
                                                             batch_size=batch_size, capacity=2000,
                                                             min_after_dequeue=1000)
             img_validate, label_validate = tf.train.shuffle_batch([img_validate, label_validate],
@@ -208,59 +258,7 @@ if __name__ == '__main__':
             t_vars = tf.trainable_variables()
             print(t_vars)
             restore_saver = tf.train.Saver()
-            #set the first acclast
             # initialize a session to run the tensor
-            with tf.Session() as sess:
-                sess.run(init)
-                # Coordinator is used to control the threads
-                coord = tf.train.Coordinator()
-                # tensorflow supports mult-thread process
-                threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-                # the id of batch
-                batch_idxs = int(3200 / batch_size)
-
-                for i in range(epoch):
-                    acclist = []
-                    for j in range(batch_idxs):
-                        # val is img vector, l is label vector
-                        val, l = sess.run([img_batch, label_batch])
-                        # one hot label for 8 classes
-                        l = one_hot(l,8)
-                        # run the training algorithm and output the accuracy, set the memory keeping probability 0.5 to decline the over-fit
-                        _, acc = sess.run([train_step, accuracy], feed_dict={x: val, y_: l, keep_prob: 0.5})
-                        #print the accuracy for each batch of images of each epoch
-                        print("Epoch:[%4d] [%4d/%4d], accuracy:[%.8f]" % (i+1, j, batch_idxs, acc) )
-                    valtrain, lt = sess.run([img_batch, label_batch])
-                    # one hot label for 8 classes
-                    lt = one_hot(lt, 8)
-                    # run the training algorithm and output the accuracy, set the memory keeping probability 0.5 to decline the over-fit
-                    _, acctrain = sess.run([train_step, accuracy], feed_dict={x: valtrain, y_: lt, keep_prob: 0.5})
-                    # validation
-                    val, l = sess.run([img_validate, label_validate])
-                    l = one_hot(l, 8)  # one hot label for testset labels
-                    print(l)
-                    labellist = l
-                    y, acc = sess.run([y_conv, accuracy], feed_dict={x: val, y_: l, keep_prob: 1})
-                    print(y)
-                    plist = y
-                    acclist.append(acc)
-                    for t in range(1, 800 // batch_size):
-                        # val is test img vector, l is test label vector of the last one batch of images
-                        val, l = sess.run([img_validate, label_validate])
-                        l = one_hot(l, 8)  # one hot label for testset labels
-                        print(l)
-                        labellist = np.vstack((labellist, l))
-                        # get the accuracy of the test set
-                        y, acc = sess.run([y_conv, accuracy], feed_dict={x: val, y_: l, keep_prob: 1})
-                        print(y)
-                        plist = np.vstack((plist, y))
-                        acclist.append(acc)
-                    accmean = np.mean(acclist)
-                    print("validation set mean accuracy: " + str(accmean))
-
-                    with open(txtpath, 'a') as file_handle:
-                     file_handle.write('\n')
-                     file_handle.write("epoch: "+str(i+1) + "\n" + "batch size: " +str(batch_size)+"\n"+"validation set accuracy: "+str(accmean) + "\n" )
-
-                coord.request_stop()
-                coord.join(threads)
+            accmean = runtensorflow(init, batch_size, txtpath, img_batch, label_batch, img_validate, label_validate,
+                              train_step, accuracy, y_conv, keep_prob)
+            print("validation set mean accuracy: " + str(accmean))

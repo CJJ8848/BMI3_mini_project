@@ -1,0 +1,31 @@
+functions:
+    def settfrecords(cwd,outfile)#used to generate the tfrecords from raw data
+    def read_and_decode(filename)#to decode and read data and labels from tfrecords
+    def one_hot(labels,Label_class)# one hot encoding for labels
+    def weight_variable(shape) def bias_variable(shape)# initialize the weight and bias
+    def conv(x,W) # convolution layer
+    def max_pool_4x4() # pooling layer
+    def CNN_3layers() # constructing 3 conv and 3 pooling and 1 fully connected layer
+        conv1 maxpooling1
+        conv2 maxpooling2
+        conv3 maxpooling3
+        fullyconnected1
+        dropout and softmax
+        output the predict results and accuracy
+    def read_and_randomize() # read the tfrecords in and randomize the order
+    def runtensorflow() #run a session to run the whole training process, output the accuracy and labellist and predictlist
+    def ROCplot(labellist,probabilitylist,accmean) # plot the ROC and calculate the AUC value
+run:
+    epoch = 10
+    batch_size = 8
+    learning_rate = 0.0001
+    # construct the CNN network
+    y_conv,accuracy,train_step,keep_prob=CNN_3layers()
+
+    # import data
+    img_batch, label_batch,img_test, label_test=read_and_randomize()
+    # train the CNN network and store results in the txt file
+    labellist,plist,accmean=runtensorflow()
+    #plot the ROC
+    ROCplot(labellist,plist,accmean)
+
