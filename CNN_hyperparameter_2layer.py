@@ -8,12 +8,26 @@ from os.path import join, dirname
 import matplotlib.pyplot as plt
 import numpy as np
 
+#image_pathway = dirname(__file__)+"/data/"
+#/Users/cuijiajun/Desktop/BMI3/BMI_mini_project/data/
+#label_list = 'TUM,STR,NORM,ADI,DEB,LYM,MUS,MUC'
+prompt = "> "
+print(f"please type the pathway of image data")
+print("example: /Users/Colorectal_hunter/Desktop/BMI3/BMI_mini_project/data/")
+image_pathway = input(prompt)
+
+print("please type a string of labels (8 classes)")
+print("example: TUM,STR,NORM,ADI,DEB,LYM,MUS,MUC")
+
+label_list = input(prompt)
+print("start...")
+
 # settfrecords used to make tfrecord files for trainset and testset
 # parameter: cwd = work directory of trainset or testset, outfile = name of output tfrecord file
 def settfrecords(cwd,outfile):
     # set classes of images
-    classes = {'TUM', 'STR','NORM','ADI','DEB','LYM','MUS','MUC'}
-    #classes = {'testtum', 'teststr'}
+    #classes = ['TUM', 'STR','NORM','ADI','DEB','LYM','MUS','MUC']
+    classes=label_list.split(",")
     # the output files
     writer = tf.python_io.TFRecordWriter(outfile)
     #
@@ -23,7 +37,6 @@ def settfrecords(cwd,outfile):
         for img_name in os.listdir(class_path):
             img_path = class_path + img_name  # pathway of each image
             img = Image.open(img_path)
-            print(np.shape(img)) # (224, 224, 3)
             img_raw = img.tobytes()  # Convert images to binary format
             # index 0 1 2 are set for each class as "label", images are saved as binary format in the "img_raw" feature
             feature = {"label": tf.train.Feature(int64_list=tf.train.Int64List(value=[index])),
@@ -32,6 +45,8 @@ def settfrecords(cwd,outfile):
             example = tf.train.Example(features=tf.train.Features(feature=feature))
             # the example is serialized as a string
             writer.write(example.SerializeToString())
+    print("shape:"+str(np.shape(img)))# (224, 224, 3)
+    print("create tfrecords success:"+str(outfile))
     writer.close()
 # Read tfrecords
 def read_and_decode(filename):
@@ -193,18 +208,22 @@ def runtensorflow(init, batch_size,txtpath,img_batch,label_batch,img_validate, l
         return accmean
 
 if __name__ == '__main__':
-    ## only used at the first time to initialize the tfrecord data from raw data
+    # only used at the first time to initialize the tfrecord data from raw data
     # in OS system, .DS_Store files need to be deleted first with the command below.
-    # sudo find /Users/cuijiajun/Desktop/BMI3/mini_project/data  -name ".DS_Store" -depth -exec rm {} \;
-    # cwd1 = dirname(__file__) +'/data/test/'
-    # cwd2= dirname(__file__) +'/data/train/'
-    # cwd3= dirname(__file__) +'/data/validate/'
-    # outfile1 = dirname(__file__) +"/tfrecords/8class_test.tfrecords"
-    # outfile2 = dirname(__file__) +"/tfrecords/8class_train.tfrecords"
-    # outfile3 = dirname(__file__) +"/tfrecords/8class_validate.tfrecords"
-    # settfrecords(cwd1,outfile1)
-    # settfrecords(cwd2,outfile2)
-    # settfrecords(cwd3,outfile3)
+    # sudo find /Users/cuijiajun/Desktop/BMI3/BMI_mini_project/data  -name ".DS_Store" -depth -exec rm {} \;
+    cwd1 = image_pathway + 'test/'
+    cwd2 = image_pathway + 'train/'
+    cwd3 = image_pathway + 'validate/'
+    if not os.path.exists(dirname(__file__) + '/tfrecords/'):
+        os.makedirs(dirname(__file__) + '/tfrecords/')
+    for file in os.listdir(dirname(__file__) + '/tfrecords/'):
+        os.remove(dirname(__file__) + '/tfrecords/' + file)
+    outfile1 = dirname(__file__) + "/tfrecords/8class_test.tfrecords"
+    outfile2 = dirname(__file__) + "/tfrecords/8class_train.tfrecords"
+    outfile3 = dirname(__file__) + "/tfrecords/8class_validate.tfrecords"
+    settfrecords(cwd1, outfile1)
+    settfrecords(cwd2, outfile2)
+    settfrecords(cwd3, outfile3)
     # start to implement
     # get img and label of train set and test set
     img, label = read_and_decode(dirname(__file__)+"/tfrecords/8class_train.tfrecords")
